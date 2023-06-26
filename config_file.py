@@ -4,30 +4,42 @@ import carla
 # Start Positionen
 from numpy import array, float32
 
+# Spawn Location for the walker and the vehicle
 spawnLocationWalker = carla.Location(x=160, y=-117, z=9.6)
 spawnLocationVehicle = carla.Location(x=135.58, y=-131.85, z=10.2)
 rotationVehicle = carla.Rotation(pitch=0, yaw=0, roll=0)
 rotationWalker = carla.Rotation(pitch=0.000000, yaw=-88.793892, roll=0.000000)
-camLocation = carla.Location(spawnLocationWalker.x - 20, spawnLocationWalker.y - 15, spawnLocationWalker.z + 30)
 spawnInfo = [spawnLocationWalker, spawnLocationVehicle, rotationVehicle, rotationWalker]
+
+# Camera Location
+camLocation = carla.Location(spawnLocationWalker.x - 20, spawnLocationWalker.y - 15, spawnLocationWalker.z + 30)
+
+# Maximum and minimum values for the x and y coordinates
 max_x_y_cords = [[100, 200], [-200, -60]]
-# For the environment
+
+# Time steps per episode
 time_steps_per_training = 128
-log_interval = 1
-testPolicys = [2]
+
+log_interval = 8
+
+# Time steps per episode
 time_steps_per_trainings = 128
-validations = 2
+validations = 10
+
 # Angle; TTC; Dist; Min TTC; Dist Imitation
 rewardDistribution = [0.0, 0.2, 0.2, 0.2, 0.2]
+
+# Steps per Training and Hyperparameter
 timesteps_preTrain = 500000
 timesteps_Train = 500000
 batch_size_preTrain = 64
 batch_size_Train = 64
 n_steps_size_faktor = 4
+maxPunishmentDistance_imitation = 10
 
 # For th connection
 syncMode = True
-render = True
+render = False
 reloadMap = True
 host = "localhost"
 reloadWorld = True
@@ -40,7 +52,7 @@ path_model = "./model/traindModel/"
 path_model_pretrain = "./model/preTrainedModel/"
 path_tb = "./tensorboard/"
 
-# Positions (Recorded)
+# Positions (Recorded) examples for the walker and the vehicle
 positions_vehicle = [[135.5831298828125, -131.85720825195312], [135.5831298828125, -131.85720825195312],
                      [135.5831298828125, -131.85720825195312], [135.5831298828125, -131.85720825195312],
                      [135.58383178710938, -131.85716247558594], [135.58604431152344, -131.85696411132812],
@@ -179,7 +191,6 @@ positions_walker_rl = [array([ 0.6390622, -1.       ,  1.       ], dtype=float32
 positions_walker_rl =[array([ 0.01132351, -1.        ,  1.        ], dtype=float32), array([ 0.5562861, -1.       ,  1.       ], dtype=float32), array([ 0.2547922, -1.       ,  1.       ], dtype=float32), array([ 0.69577426, -1.        ,  1.        ], dtype=float32), array([ 0.55155164, -1.        ,  1.        ], dtype=float32), array([-0.16527063, -1.        ,  1.        ], dtype=float32), array([ 1., -1.,  1.], dtype=float32), array([ 0.8142908, -1.       ,  1.       ], dtype=float32), array([ 0.08894581, -1.        ,  1.        ], dtype=float32), array([ 0.8785836, -1.       ,  1.       ], dtype=float32), array([ 0.5617424, -1.       ,  1.       ], dtype=float32), array([ 0.38552573, -1.        ,  1.        ], dtype=float32), array([-0.07678294, -1.        ,  1.        ], dtype=float32), array([ 0.17998639, -1.        ,  1.        ], dtype=float32), array([ 0.28850806, -1.        ,  1.        ], dtype=float32), array([ 0.15642115, -1.        ,  1.        ], dtype=float32), array([ 0.44657373, -1.        ,  1.        ], dtype=float32), array([ 0.46115005, -1.        ,  1.        ], dtype=float32), array([-0.6347688, -1.       ,  1.       ], dtype=float32), array([-0.88780797, -1.        ,  1.        ], dtype=float32), array([-0.10490811, -1.        ,  1.        ], dtype=float32), array([-1., -1.,  1.], dtype=float32), array([ 0.3294015, -1.       ,  1.       ], dtype=float32), array([-0.1869773, -1.       ,  1.       ], dtype=float32), array([-0.88324046, -1.        ,  1.        ], dtype=float32), array([-0.97355485, -1.        ,  1.        ], dtype=float32), array([-0.9126126 , -0.61277735,  1.        ], dtype=float32), array([-1.        , -0.46279985,  1.        ], dtype=float32), array([-1.        , -0.04985017,  1.        ], dtype=float32), array([-0.6325244 , -0.48380768,  1.        ], dtype=float32), array([-0.97088563, -0.88541543,  1.        ], dtype=float32), array([-1.        , -0.22794141,  1.        ], dtype=float32), array([-1.        , -0.03006177,  0.6084789 ], dtype=float32), array([-1.       , -0.5145249,  1.       ], dtype=float32), array([-0.28531134, -0.38831204,  1.        ], dtype=float32), array([-1.        , -0.18654785,  1.        ], dtype=float32), array([-1.       , -0.5043221,  1.       ], dtype=float32), array([-1.        ,  0.13776818,  1.        ], dtype=float32), array([-1.       , -0.5096968,  1.       ], dtype=float32), array([-0.20037442, -0.24114892,  1.        ], dtype=float32), array([-1.        ,  0.40435016,  1.        ], dtype=float32), array([-1.        , -0.19392589,  1.        ], dtype=float32), array([-1.        ,  0.32013592,  1.        ], dtype=float32), array([-1.        ,  0.07825514,  1.        ], dtype=float32), array([-1.       ,  0.7918581,  0.9009998], dtype=float32), array([-1.      , -0.797575,  1.      ], dtype=float32), array([-1.        ,  0.02494738,  1.        ], dtype=float32), array([-1.        , -0.22213593,  0.6927301 ], dtype=float32), array([-1.        ,  0.98098004,  0.16723144], dtype=float32), array([-1.      ,  0.003976,  1.      ], dtype=float32), array([-0.7357858, -0.1264738,  1.       ], dtype=float32), array([-0.8473966 , -0.26757568,  1.        ], dtype=float32), array([-0.8856524, -0.4551078,  1.       ], dtype=float32), array([-1.       , -0.7594987,  1.       ], dtype=float32), array([-1.        ,  0.23404503,  0.6639902 ], dtype=float32), array([-0.90675026, -0.40343696,  0.83807814], dtype=float32), array([-1.       ,  0.0132148,  1.       ], dtype=float32), array([-0.16395253,  0.13973993,  1.        ], dtype=float32), array([-0.891558  , -0.48095167,  1.        ], dtype=float32), array([-1.        , -0.51314414,  1.        ], dtype=float32), array([-1.        ,  0.35080615,  1.        ], dtype=float32), array([-1.       , -0.3834107,  1.       ], dtype=float32), array([-1.       ,  0.5787997,  1.       ], dtype=float32), array([-1.        , -0.12392708,  1.        ], dtype=float32), array([-1.        ,  0.39682168,  0.2675975 ], dtype=float32), array([-1.        ,  0.02453238,  1.        ], dtype=float32), array([-0.46098858, -0.6074708 ,  1.        ], dtype=float32), array([-1.        ,  0.01649441,  0.29384285], dtype=float32), array([-0.6294099 ,  0.03427095,  1.        ], dtype=float32), array([-1.        , -0.00464394,  1.        ], dtype=float32), array([-0.7615095 ,  0.12628001,  0.9809072 ], dtype=float32), array([-1.,  1.,  1.], dtype=float32), array([-1.        ,  0.16057101,  0.55935556], dtype=float32), array([-0.95754474,  0.18580493,  0.8942305 ], dtype=float32), array([-0.61907005, -0.5942945 ,  1.        ], dtype=float32), array([-1.      ,  0.068779,  1.      ], dtype=float32), array([-0.28492254,  0.14582112,  0.40229517], dtype=float32), array([-0.83285606,  0.36145142,  1.        ], dtype=float32), array([-0.3837431 , -0.25044838,  1.        ], dtype=float32), array([0.4187804 , 0.38128138, 0.7828022 ], dtype=float32), array([-0.7748727 ,  0.49944744,  0.44923973], dtype=float32), array([-1.        , -0.12880382,  0.43486977], dtype=float32), array([-0.7916899 , -0.50235367,  0.91640174], dtype=float32), array([-1.        , -0.43433627,  1.        ], dtype=float32), array([-1.       ,  0.4500875,  1.       ], dtype=float32), array([-1.        ,  0.21516788,  1.        ], dtype=float32), array([-0.3772285,  0.8961459,  1.       ], dtype=float32), array([-1.        ,  0.24252892,  1.        ], dtype=float32), array([-0.4982425,  0.8279018,  1.       ], dtype=float32), array([-1.        ,  0.49261922,  0.7097732 ], dtype=float32), array([-1.       ,  0.5527688,  0.7930194], dtype=float32), array([-0.7373471 ,  0.14117819,  0.94322556], dtype=float32), array([-1.        , -0.19190645,  0.620159  ], dtype=float32), array([-1.        ,  0.25697592,  1.        ], dtype=float32), array([-1.        , -0.84535736,  1.        ], dtype=float32), array([-1.        , -0.13864481,  1.        ], dtype=float32), array([-1.        , -0.48493558,  1.        ], dtype=float32), array([-1.        ,  0.24662161,  1.        ], dtype=float32), array([-1.        , -0.43611112,  0.5423764 ], dtype=float32), array([-1.       ,  0.7959145,  0.8366628], dtype=float32), array([-1.       , -0.5727278,  0.7830765], dtype=float32), array([-1.        , -0.36145347,  1.        ], dtype=float32), array([-1.        ,  0.91456234,  1.        ], dtype=float32), array([-1.        , -0.57896155,  1.        ], dtype=float32), array([-1.       , -0.0952132,  1.       ], dtype=float32), array([-1.        , -0.29437155,  0.5596231 ], dtype=float32), array([-1.        ,  0.16272405,  1.        ], dtype=float32), array([-1.       , -0.5153997,  1.       ], dtype=float32), array([-1.        , -0.21817723,  1.        ], dtype=float32), array([-1.        ,  0.01422903,  1.        ], dtype=float32), array([-1.        , -0.35893852,  1.        ], dtype=float32), array([-1.        , -0.25680077,  1.        ], dtype=float32), array([-1.        , -0.26907858,  1.        ], dtype=float32), array([-1.        , -0.10230996,  1.        ], dtype=float32), array([-1.        , -0.11486412,  1.        ], dtype=float32), array([-1.        , -0.27085364,  1.        ], dtype=float32), array([-1.        , -0.81902647,  1.        ], dtype=float32), array([-1.        , -0.62238425,  1.        ], dtype=float32), array([-1.        , -0.86254776,  1.        ], dtype=float32), array([-1.        , -0.76789707,  1.        ], dtype=float32), array([-1.        , -0.38944533,  1.        ], dtype=float32), array([-1.        ,  0.16027743,  1.        ], dtype=float32), array([-1.        ,  0.30592287,  1.        ], dtype=float32), array([-1.        ,  0.06650761,  1.        ], dtype=float32), array([-1.        , -0.46890438,  1.        ], dtype=float32), array([-1.        , -0.63916177,  1.        ], dtype=float32), array([-1.      , -0.457514,  1.      ], dtype=float32), array([-1.      , -0.520283,  1.      ], dtype=float32)]
 
 
-maxPunishmentDistance_imitation = 10
 
 
 var_connection = {
@@ -218,8 +229,6 @@ var_startpos = {
 var_lrl = {
     'time_steps_per_training': time_steps_per_training,
     'log_interval': log_interval,
-    'testPolicys': testPolicys,
-    'time_steps_per_trainings': time_steps_per_trainings,
     'validations': validations,
     'rewardDistribution': rewardDistribution,
     'timesteps_preTrain': timesteps_preTrain,

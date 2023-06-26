@@ -15,6 +15,7 @@ from stable_baselines3.common.callbacks import BaseCallback
 
 
 class CustomTensorboardCallback(BaseCallback):
+    # A custom callback that derives from `BaseCallback` for saving training stats in TensorBoard.
     def __init__(self, verbose=0):
         super(CustomTensorboardCallback, self).__init__(verbose)
     def _on_training_start(self) -> None:
@@ -59,38 +60,15 @@ class CustomTensorboardCallback(BaseCallback):
         pass
 
 
-def select_policy_by_index(index):
-    select_policy = index
-    if select_policy == 0:
-        print("Die default Richtlinie wird ausgewählt. dict(pi=[64, 64], vf=[64, 64])")
-        policy_kwargs = None
-    elif select_policy == 1:
-        print("Die erste Richtlinie wird ausgewählt. net_arch=dict(pi=[128, 64, 64], vf=[128, 64, 64])")
-        policy_kwargs = dict(net_arch=dict(pi=[128, 64, 64], vf=[128, 64, 64]))
-    elif select_policy == 2:
-        print("Die zweite Richtlinie wird ausgewählt.256, 256, dict(vf=[512, 256, 128], pi=[512, 256, 128])")
-        policy_kwargs = {
-            'net_arch': [256, 256, dict(vf=[512, 256, 128], pi=[512, 256, 128])],
-            'activation_fn': nn.ReLU
-        }
-    elif select_policy == 3:
-        print("Die dritte Richtlinie wird ausgewählt.")
-        policy_kwargs = {
-            'net_arch': [64, 64, dict(vf=[256, 128], pi=[256, 128])],
-            'activation_fn': nn.ELU
-        }
-
-    return policy_kwargs
-
-
+# Saves the basic reward in a file
 def saveBasic_reward(basicReward, index, file_name="basic_rewards.txt"):
     with open(file_name, "a") as file:
         file.write(f"[{index},{basicReward}]\n")
 
-
+# Train the model with the given parameters
 def trainBaseline(n=2, steps=128, total_timesteps=1000000, nameOfRuns="default", distribute=[0, 0, 0, 0, 1.0]):
     # Parameter
-    log_interval = 8
+    log_interval = var_lrl["log_interval"]
     policy = build_policy(3, 'tanh')
 
     # Iterations for training multiple models
@@ -101,10 +79,20 @@ def trainBaseline(n=2, steps=128, total_timesteps=1000000, nameOfRuns="default",
             print(f"Die Datei unter {model_path} existiert.")
             continue
         new_logger = configure(tb_path, ["tensorboard", "stdout"])
-        env = CustomEnv(time_steps_per_training=steps, syncMode=True, render=False,
+        # Camera Location
+        camLocation = var_startpos["camLocation"]
+        # Spawn Info (Spawn Locations, Spawn Rotations)
+        spawnInfo = var_startpos["spawnInfo"]
+
+        syncMode = var_connection["syncMode"]
+        render_env = var_connection["render"]
+
+        env = CustomEnv(time_steps_per_training=steps, syncMode=syncMode, render=render_env,
                         spawnInfo=spawnInfo, camaraLocation=camLocation)
         # Angle; TTC; Dist; Min TTC; Dist Imitation
         env.rewardDistribution = distribute
+
+        #TODO change Hyperparameter if needed
         model = PPO("MlpPolicy", env, verbose=1, n_steps=1024, policy_kwargs=policy, learning_rate=0.00015)
         # model = PPO("MlpPolicy", env, verbose=1)
         model.set_logger(new_logger)
@@ -116,34 +104,18 @@ def trainBaseline(n=2, steps=128, total_timesteps=1000000, nameOfRuns="default",
 
 
 if __name__ == '__main__':
-    time_steps_per_training = var_lrl["time_steps_per_training"]
-    log_interval = var_lrl["log_interval"]
-    spawnLocationWalker = var_startpos["spawnLocationWalker"]
-    spawnLocationVehicle = var_startpos["spawnLocationVehicle"]
-    rotationVehicle = var_startpos["rotationVehicle"]
-    rotationWalker = var_startpos["rotationWalker"]
-    camLocation = var_startpos["camLocation"]
-    spawnInfo = var_startpos["spawnInfo"]
-    testPolicys = var_lrl["testPolicys"]
-    time_steps_per_trainings = var_lrl["time_steps_per_trainings"]
-    steps = time_steps_per_trainings
+
+    # Parameter from config_file
+    steps = var_lrl["time_steps_per_training"]
     validations = var_lrl["validations"]
     rewardDistribution = var_lrl["rewardDistribution"]
-    timesteps_preTrain = var_lrl["timesteps_preTrain"]
     timesteps_Train = var_lrl["timesteps_Train"]
-    batch_size_preTrain = var_lrl["batch_size_preTrain"]
-    batch_size_Train = var_lrl["batch_size_Train"]
-    syncMode = var_connection["syncMode"]
-    render_env = var_connection["render"]
     n_steps_size_faktor = var_lrl["n_steps_size_faktor"]
 
-    # Angle; TTC; Dist; Min TTC; Dist Imitation
-    distribute = [0.0, 0.0, 0.0, 0.0, 1.0]
-    steps = 128
-    n = 10
-    total_timesteps = 1000000
     nameOfRuns = "Imitation"
-    trainBaseline(n=n, steps=steps, total_timesteps=total_timesteps, nameOfRuns=nameOfRuns, distribute=distribute)
+
+    trainBaseline(n=validations, steps=steps, total_timesteps=timesteps_Train,
+                  nameOfRuns=nameOfRuns, distribute=rewardDistribution)
 
 
     exit(0)

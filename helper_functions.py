@@ -12,7 +12,7 @@ from config_file import var_lrl, var_startpos, var_connection, var_paths
 from envirionment import CustomEnv
 import optuna
 
-
+# Gets the Connection to Carla with some default parameters
 def get_connection(townName="Town03", host="localhost", reloadWorld=var_connection['reloadWorld'],
                    camaraLocation=var_startpos['camLocation'], camRotation=None, render=var_connection['render'],
                    syncMode=var_connection['syncMode'],
@@ -28,7 +28,7 @@ def get_connection(townName="Town03", host="localhost", reloadWorld=var_connecti
 def euclidean_distance(point1, point2):
     return ((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2) ** 0.5
 
-
+# Gets the x, y and z pos of an actor
 def get_actor_position(world, vehicle_id):
     vehicle = world.get_actor(vehicle_id)
     if vehicle is not None:
@@ -42,7 +42,7 @@ def get_actor_position(world, vehicle_id):
         print("Actor not found")
         return None
 
-
+# Retruns distance beween two actors in meters
 def distance_actor(actor1, actor2):
     try:
         pos1 = actor1.get_location()
@@ -53,7 +53,7 @@ def distance_actor(actor1, actor2):
         print("Fail")
         return 999
 
-
+# Returns all near walkers within a set distance
 def find_nearWalkers(world, vehicle, max_distance=30, special_id=None):
     walkers_list = world.get_actors().filter('walker.pedestrian.*')
     near_walkers = [walker for walker in walkers_list if
@@ -68,7 +68,7 @@ def find_nearWalkers(world, vehicle, max_distance=30, special_id=None):
     else:
         return near_walkers
 
-
+# Predicts a given model and returns the mean reward
 def predictModel(env, model, steps, num_runs=3, render_afterwards=False, render_mode="human"):
     rewards_all = []
 
@@ -95,7 +95,7 @@ def predictModel(env, model, steps, num_runs=3, render_afterwards=False, render_
 
     return mean_rewards
 
-
+# Returns the environment with some default parameters
 def getEnvirionment(envName="CustomEnv", time_steps_per_training=var_lrl['time_steps_per_trainings'], syncMode=True,
                     render=True,
                     spawnInfo=var_startpos['spawnInfo'], reloadMap=var_connection['reloadMap'],
@@ -106,12 +106,12 @@ def getEnvirionment(envName="CustomEnv", time_steps_per_training=var_lrl['time_s
                         camRotation=camRotation, port=port)
     return env
 
-
+# Returns the current time as a string
 def get_current_timestamp():
     x = datetime.datetime.now()
     return f"{x.year}_{x.month}_{x.day}_{x.hour}_{x.minute}"
 
-
+# Function to create an optuna study
 def create_optuna_storageMySQL(user, pw, ip, dbName, studyName, direction='maximize'):
     storage = optuna.storages.RDBStorage(
         url=f'mysql://{user}:{pw}@{ip}/{dbName}',
@@ -122,7 +122,7 @@ def create_optuna_storageMySQL(user, pw, ip, dbName, studyName, direction='maxim
     )
     return optuna.create_study(study_name=studyName, storage=storage, direction=direction)
 
-
+# Function to load an optuna study
 def load_optuna_studyMySQL(user, pw, ip, dbName, studyName):
     storage = optuna.storages.RDBStorage(
         url=f'mysql://{user}:{pw}@{ip}/{dbName}',
@@ -136,6 +136,7 @@ def load_optuna_studyMySQL(user, pw, ip, dbName, studyName):
     )
     return study
 
+# Function to get or create an optuna study (if it does not exist)
 def get_or_create_optuna_study(user, pw, ip, dbName, studyName, direction='maximize'):
     storage = optuna.storages.RDBStorage(
         url=f'mysql://{user}:{pw}@{ip}/{dbName}',
@@ -147,7 +148,7 @@ def get_or_create_optuna_study(user, pw, ip, dbName, studyName, direction='maxim
     study = optuna.create_study(study_name=studyName, storage=storage, direction=direction, load_if_exists=True)
     return study
 
-
+# Funktin to visualize an optuna study as a plot
 def plot_optuna_study(study, params_list=None, type="history"):
     if type == "history":
         fig = optuna.visualization.plot_optimization_history(study)
@@ -163,7 +164,7 @@ def plot_optuna_study(study, params_list=None, type="history"):
     else:
         print("Wrong type")
 
-
+# Build the policy for the PPO algorithm containing the activation function and the network architecture
 def build_policy(sel_policy, activation_function):
     if activation_function == "relu":
         activation_function = nn.ReLU
@@ -190,7 +191,7 @@ def build_policy(sel_policy, activation_function):
         policy_kwargs = None
     return policy_kwargs
 
-
+# Function to pre-train a model and save it
 def pre_train_model_imitation(steps, tb_path, n_steps, policy_kwargs, batch_size, model_path, timesteps):
     spawnInfo = var_startpos['spawnInfo']
     camLocation = var_startpos['camLocation']

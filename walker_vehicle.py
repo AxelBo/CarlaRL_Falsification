@@ -7,6 +7,7 @@ import numpy as np
 
 
 class WalkerClass:
+    # Class for the walker
     def __init__(self, world, spawnPoint_init, rotation):
         self.world = world
         self.spawnPoint_init = spawnPoint_init
@@ -15,6 +16,7 @@ class WalkerClass:
         self.carlaWalker, self.collisionSensor = self.__spawn_walker()
         # bounding_box = self.carlaWalker.bounding_box
         # print("bounding_box Walker: ", bounding_box.extent, "Zenter: ", bounding_box.location)
+
 
     def __spawn_walker(self):
         """ Load Blueprint and spawn walker """
@@ -29,10 +31,12 @@ class WalkerClass:
             print("collision sensor failed")
         return walker, collision_sensor_walker
 
+    # Get x and y position of walker
     def getPositionXY(self):
         return [self.carlaWalker.get_transform().location.x,
                 self.carlaWalker.get_transform().location.y]
 
+    # Apply control to walker
     def apply_control(self, action):
         walker_speed_action = action[2]
         action = np.array([action[0], action[1]])
@@ -55,6 +59,7 @@ class WalkerClass:
         unit_action = np.append(unit_action, [walker_speed])
         return unit_action.tolist()
 
+    # Reset walker to initial position
     def resetWalker(self):
         try:
             self.collisionSensor.destroy()
@@ -67,6 +72,7 @@ class WalkerClass:
 # Represents a vehicle in the CARLA simulation. It contains methods for initializing the vehicle, resetting its
 # position, and interacting with the CustomEnv environment.
 class VehicleClass:
+    # Class for the vehicle
     def __init__(self, connection, spawnPoint_init=carla.Location(x=-39.944832, y=-3.153754, z=2.150400),
                  force3D=carla.Vector3D(x=0, y=0, z=0), rotation=carla.Rotation(pitch=0, yaw=180, roll=0),
                  environment=None):
@@ -86,6 +92,7 @@ class VehicleClass:
         self.env = environment
         # connection.draw_waypoint(spawnPoint_init, "o")
 
+    # Spawn vehicle
     def __spawn_car(self, addForce3D):
         """ Spawn Car on a given position and activate autopilot"""
         tm_port = self.set_tm_seed()
@@ -104,6 +111,7 @@ class VehicleClass:
         collision_sensor_car.listen(lambda event: self.collision_handler(event))
         return car, collision_sensor_car
 
+    # Set seed for traffic manager
     def set_tm_seed(self):
         """ Set the seed of traffic manger"""
         # === Set Seed for TrafficManager ===
@@ -113,10 +121,12 @@ class VehicleClass:
         tm.set_random_device_seed(seed_value)
         return tm_port
 
+    # Get x and y position of vehicle
     def getPositionXY(self):
         return [self.vehicleCarla.get_transform().location.x,
                 self.vehicleCarla.get_transform().location.y]
 
+    # Collision handler in case vehicle collide with walker
     def collision_handler(self, event):
         """ handle collisions and calculate extra reward """
         actor_we_collide_against = event.other_actor
@@ -141,7 +151,7 @@ class VehicleClass:
                     # print(f"Actions: {self.env.actionsList}")
         else:
             ...
-
+    # Reset vehicle to initial position
     def reset_car(self):
         tm_port = self.set_tm_seed()
         self.vehicleCarla.set_autopilot(False, tm_port)

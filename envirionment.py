@@ -27,7 +27,7 @@ def dist_xy(pos1, pos2):
 def velocity_3d_to_ms(velocity3d):
     return math.sqrt(velocity3d.x ** 2 + velocity3d.y ** 2 + velocity3d.z ** 2)
 
-
+# Returns a Polygon object that represents the bounding box of a vehicle.
 def calc_bounding_box(p0, angle, length, width):
     if abs(length) < 0.1:
         length = 0.1
@@ -52,7 +52,7 @@ def calc_bounding_box(p0, angle, length, width):
     point4 = (x, y)
     return Polygon([point1, point2, point4, point3])
 
-
+# Returns the current timestamp in the format: year_month_day_hour_minute
 def get_current_timestamp():
     x = datetime.datetime.now()
     return f"{x.year}_{x.month}_{x.day}_{x.hour}_{x.minute}"
@@ -139,7 +139,7 @@ class CustomEnv(gym.Env):
         self.observation_space = spaces.Box(low=low, high=high,
                                             shape=(obs_size,), dtype=np.float32)
 
-        # === Carla ===
+        # === Carla connection ===
         self.connection = connectionCarla.CarlaConnection()
         self.connection.__int__(render=render, syncMode=syncMode,
                                 camaraLocation=camaraLocation,
@@ -164,15 +164,16 @@ class CustomEnv(gym.Env):
 
         self.connection.world.tick()
         # Some other stuff
-        self.path_basescore = None
         # self.renderPolys()
         # self.drawsImitationPoints()
 
+    # Draw all points from imitation
     def drawsImitationPoints(self):
         for p in self.positions_walker:
             l = carla.Location(x=p[0], y=p[1], z=8)
             self.connection.draw_waypoint(location=l, index='x', life_time=3000, intensity=0)
 
+    # Render polys for testing
     def renderPolys(self):
 
         point1 = carla.Location(x=159.5, y=-80, z=8)
@@ -219,11 +220,13 @@ class CustomEnv(gym.Env):
 
         return self.getObservation(), self.rewardCalculation(), self.done, self.info
 
+    # Saves the action list to a file
     def saveActionList(self):
         filename = "actionList.txt"
         with open(filename, "a") as file:
             file.write(str(self.actionsList) + "\n")
 
+    # Gets all observations from the environment
     def getObservation(self):
         velW = self.walker.carlaWalker.get_velocity()
         velocityWalker = [velW.x, velW.y]
@@ -240,6 +243,7 @@ class CustomEnv(gym.Env):
         obs = np.array(posCar + velocityVehicle + posWaler + velocityWalker + directionWalker + imitation_walker_xy)
         return obs
 
+    # Calculates the relative angle between the walker and the vehicle
     def relativeAngle(self):
         posCar = self.vehicle.getPositionXY()
         posWalker = self.walker.getPositionXY()
@@ -247,6 +251,7 @@ class CustomEnv(gym.Env):
         y_rel = posCar[1] - posWalker[1]
         return self.walker.carlaWalker.get_transform().rotation.yaw - math.degrees(math.atan2(y_rel, x_rel))
 
+    # Calculates if the walker is within the givenen polygons or returns distance to closest polygon
     def rewardPoint_in_Polys(self, point_x_y, polys=None):
 
         point2 = self.positions_walker[self.tick_count]
@@ -278,6 +283,7 @@ class CustomEnv(gym.Env):
         #                               intensity=1)
         return max(-dist_min / 2, -1)
 
+    # Calculates the reward based on distance to the imitation walker
     def rewardCalculation_imitation(self):
         point = self.positions_walker[self.tick_count]
         distance = math.dist(self.walker.getPositionXY(), point)
@@ -446,6 +452,7 @@ class CustomEnv(gym.Env):
                                                  posVehicle)
         return self.punishmentTTC
 
+    # Search in each step for collision
     def ttc_collision_search(self, timetoCollisionSearch, timeLookAhead, vel1, vel2, rot1, rot2, posWalker, posVehicle):
         while timetoCollisionSearch < timeLookAhead:
             length = vel1 * timetoCollisionSearch
@@ -469,6 +476,7 @@ class CustomEnv(gym.Env):
                 timetoCollisionSearch += 0.1
         return self.punishmentTTC
 
+    # Shows the bounding box of the vehicle in carla
     def showCarPoint(self):
         posVehicle = self.vehicle.getPositionXY()
         rot2 = math.radians(self.vehicle.vehicleCarla.get_transform().rotation.yaw)
